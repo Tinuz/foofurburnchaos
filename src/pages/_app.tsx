@@ -1,8 +1,20 @@
-import '../styles/globals.css';
 import type { AppProps } from 'next/app';
+import { useMemo } from 'react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import '../styles/globals.css';
 
-function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+const network = WalletAdapterNetwork.Devnet;
+const endpoint = 'https://api.devnet.solana.com';
+
+export default function App({ Component, pageProps }: AppProps) {
+  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+  return (
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <Component {...pageProps} />
+      </WalletProvider>
+    </ConnectionProvider>
+  );
 }
-
-export default MyApp;
