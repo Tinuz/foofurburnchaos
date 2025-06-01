@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-gray-100 text-gray-800 font-sans;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+}
+
+button {
+    @apply bg-blue-500 text-white font-semibold py-2 px-4 rounded;
+}
+
+button:hover {
+    @apply bg-blue-600;
+}
+
+.leaderboard {
+    @apply mt-4 p-4 bg-white rounded shadow-md;
+}
+
+.cookie-badge {
+    @apply inline-flex items-center justify-center w-8 h-8 bg-yellow-300 rounded-full;
+}
+
+.microwave-animation {
+    @apply w-32 h-32 mx-auto;
+}
+
+.burn-button {
+    @apply w-full h-16 flex items-center justify-center;
+}
