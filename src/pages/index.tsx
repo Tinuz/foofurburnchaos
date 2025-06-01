@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Header from '../components/Header';
 import TokenRefundTimer from '../components/TokenRefundTimer';
 import MagnetronTimer from '../components/MagnetronTimer';
-import WalletConnect from '../components/WalletConnect'; // <-- importeer WalletConnect
+import WalletConnect from '../components/WalletConnect';
+import Leaderboard from '../components/Leaderboard';
 
 const BURN_TIME = 5;
 const FEEDBACK_TIME = 3000;
@@ -13,6 +14,7 @@ const REFUND_TIME = 30;
 const Home = () => {
   const [phase, setPhase] = useState<'idle' | 'burning' | 'feedback' | 'refund'>('idle');
   const [timerKey, setTimerKey] = useState(0);
+  const [burnedTokens, setBurnedTokens] = useState(0);
 
   const handleBurn = () => {
     setPhase('burning');
@@ -21,6 +23,7 @@ const Home = () => {
 
   const handleMagnetronDone = () => {
     setPhase('feedback');
+    setBurnedTokens((n) => n + 1);
     setTimeout(() => {
       setPhase('refund');
     }, FEEDBACK_TIME);
@@ -99,7 +102,7 @@ const Home = () => {
               textShadow: '0 0 8px #fff7e0',
               minWidth: 200,
               maxWidth: 320,
-              background: 'radial-gradient(ellipse at 50% 30%, #d2b77c 60%, #8c6b3f 100%)',
+              //background: 'radial-gradient(ellipse at 50% 30%, #d2b77c 60%, #8c6b3f 100%)',
               border: 'none',
             }}
           >
@@ -161,11 +164,16 @@ const Home = () => {
               cursor: phase !== 'idle' ? 'not-allowed' : 'pointer',
               display: 'block',
               borderRadius: '8px',
-              boxShadow: '0 0 2px 2px #cc3d3d',
+              //boxShadow: '0 0 2px 2px #cc3d3d',
             }}
             priority
           />
         </button>
+
+        {/* Leaderboard direct onder de burn button */}
+        <Leaderboard
+          burnedTokens={burnedTokens}
+        />
       </main>
 
       {/* Footer */}
