@@ -9,6 +9,7 @@ import Leaderboard from '../components/Leaderboard';
 import RewardModal from '../components/RewardModal';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import FoofBalance from '../components/FoofBalance';
 
 const BURN_TIME = 10;
 const REFUND_TIME = 30;
@@ -45,6 +46,7 @@ const Home = () => {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [reward, setReward] = useState<null | { name: string; image: string; rarity: string }>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [inserted, setInserted] = useState(0);
   const { width, height } = useWindowSize();
 
   const handleBurn = () => {
@@ -87,6 +89,14 @@ const Home = () => {
     setTimeout(() => {
       setPhase('refund');
     }, 300);
+  };
+
+  const handleInsert = () => {
+    setInserted((n) => n + 1); // elke klik vermindert 1 token
+
+    // Speel coin geluid af (optioneel)
+    const audio = new Audio('/coin.mp3');
+    audio.play().catch(() => {});
   };
 
   return (
@@ -200,34 +210,77 @@ const Home = () => {
 
       {/* Burn Action */}
       <main className="flex flex-col items-center w-full flex-1 justify-end pb-8">
-        <button
-          className="relative group focus:outline-none mt-2 mb-2"
-          style={{
-            border: 'none',
-            background: 'none',
-            padding: 0,
-          }}
-          onClick={handleBurn}
-          aria-label="Burn"
-          disabled={phase !== 'idle'}
-        >
-          <Image
-            src="/images/burn.png"
-            alt="Burn"
-            width={160}
-            height={80}
-            className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-hover:shadow-[0_0_24px_8px_#cc3d3d] group-active:animate-shake-micro"
+        <div className="flex gap-4">
+          <button
+            className="relative group focus:outline-none mt-2 mb-2"
             style={{
-              imageRendering: 'pixelated',
-              opacity: phase !== 'idle' ? 0.7 : 1,
-              cursor: phase !== 'idle' ? 'not-allowed' : 'pointer',
-              display: 'block',
-              borderRadius: '8px',
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              boxShadow: 'none',
             }}
-            priority
-          />
-        </button>
-
+            onClick={handleBurn}
+            aria-label="Burn"
+            disabled={phase !== 'idle'}
+          >
+            <Image
+              src="/images/burn.png"
+              alt="Burn"
+              width={160}
+              height={80}
+              className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
+              style={{
+                imageRendering: 'pixelated',
+                opacity: phase !== 'idle' ? 0.7 : 1,
+                cursor: phase !== 'idle' ? 'not-allowed' : 'pointer',
+                display: 'block',
+                borderRadius: 0,
+                background: 'transparent',
+              }}
+              priority
+            />
+          </button>
+          <button
+            className="ml-2 relative group focus:outline-none mt-2 mb-2"
+            style={{
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              boxShadow: 'none',
+            }}
+            onClick={handleInsert}
+            aria-label="Insert"
+            disabled={phase !== 'idle'}
+          >
+            <Image
+              src="/images/insert.png"
+              alt="Insert"
+              width={180}
+              height={90}
+              className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
+              style={{
+                imageRendering: 'pixelated',
+                opacity: phase !== 'idle' ? 0.7 : 1,
+                cursor: phase !== 'idle' ? 'not-allowed' : 'pointer',
+                display: 'block',
+                borderRadius: 0,
+                background: 'transparent',
+              }}
+              priority
+            />
+            <span
+              className="absolute inset-0 flex items-center justify-center font-bold text-xl"
+              style={{
+                color: '#3a2f1b',
+                fontFamily: "'Press Start 2P', monospace",
+                pointerEvents: 'none',
+                textShadow: '0 0 8px #fffbe8, 0 0 2px #d2b77c',
+                letterSpacing: '0.08em',
+              }}
+            >
+            </span>
+          </button>
+        </div>
         {/* Leaderboard direct onder de burn button */}
         <Leaderboard burnedTokens={burnedTokens} />
       </main>
@@ -243,6 +296,8 @@ const Home = () => {
       {/* Confetti */}
       {showConfetti && <Confetti width={width} height={height} />}
 
+      <FoofBalance inserted={inserted} />
+      
       {/* Footer */}
       <footer
         className="w-full py-5 px-4 mt-auto flex flex-col md:flex-row items-center justify-between text-xs"
