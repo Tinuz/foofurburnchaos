@@ -6,27 +6,87 @@ import TokenRefundTimer from '../components/TokenRefundTimer';
 import MagnetronTimer from '../components/MagnetronTimer';
 import WalletConnect from '../components/WalletConnect';
 import Leaderboard from '../components/Leaderboard';
+import RewardModal from '../components/RewardModal';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 
-const BURN_TIME = 5;
-const FEEDBACK_TIME = 3000;
+const BURN_TIME = 10;
 const REFUND_TIME = 30;
+
+const REWARDS = [
+  { name: 'Empty Can', image: 'empty_can.png', rarity: 'common' },
+  { name: 'Poo', image: 'poo.png', rarity: 'common' },
+  { name: 'Keys', image: 'keys.png', rarity: 'uncommon' },
+  { name: 'Shoe', image: 'shoe.png', rarity: 'uncommon' },
+  { name: 'Sausages', image: 'sausges.png', rarity: 'rare' },
+  { name: 'Coin', image: 'coin.png', rarity: 'rare' },
+  { name: 'Cookie', image: 'cookie.png', rarity: 'legendary' },
+];
+
+function getRandomReward() {
+  const roll = Math.random() * 100;
+  let pool;
+  if (roll < 60) {
+    pool = REWARDS.filter(r => r.rarity === 'common');
+  } else if (roll < 90) {
+    pool = REWARDS.filter(r => r.rarity === 'uncommon');
+  } else if (roll < 99.9) {
+    pool = REWARDS.filter(r => r.rarity === 'rare');
+  } else {
+    pool = REWARDS.filter(r => r.rarity === 'legendary');
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 const Home = () => {
   const [phase, setPhase] = useState<'idle' | 'burning' | 'feedback' | 'refund'>('idle');
   const [timerKey, setTimerKey] = useState(0);
   const [burnedTokens, setBurnedTokens] = useState(0);
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [reward, setReward] = useState<null | { name: string; image: string; rarity: string }>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize();
 
   const handleBurn = () => {
     setPhase('burning');
     setTimerKey((k) => k + 1);
+
+    // Dummy audio (optioneel) - niet blocking
+    setTimeout(() => {
+      const audio = new Audio('/microwave.mp3');
+      audio.play().catch(() => {});
+      setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }, 11700); // stop na 12 seconden
+    }, 0);
   };
 
   const handleMagnetronDone = () => {
-    setPhase('feedback');
+    console.debug('Magnetron done: about to show reward modal');
+
+    // Dummy audio (optioneel) - eerst afspelen
+    const audio = new Audio('/horn.mp3');
+    audio.play().catch(() => {});
+
+    // Daarna reward tonen
+    const selected = getRandomReward();
+    setReward(selected);
+    setShowRewardModal(true);
     setBurnedTokens((n) => n + 1);
+
+    // Confetti tonen
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 6000); // confetti na 6s weer weg
+  };
+
+  const handleCloseRewardModal = () => {
+    // Debug: check wanneer de modal gesloten wordt
+    console.debug('Reward modal closed');
+    setShowRewardModal(false);
     setTimeout(() => {
       setPhase('refund');
-    }, FEEDBACK_TIME);
+    }, 300);
   };
 
   return (
@@ -45,15 +105,15 @@ const Home = () => {
 
       <header className="w-full flex flex-col items-center pt-4 pb-2 relative">
         <h1
-          className="text-3xl md:text-5xl font-bold tracking-widest text-center mb-2"
+          className="text-3xl md:text-5xl font-bold tracking-widest text-center mb-2 uppercase"
           style={{
-            fontFamily: "'Press Start 2P', 'VT323', monospace",
+            fontFamily: "'Press Start 2P', system-ui, sans-serif",
             color: '#3a2f1b',
             textShadow: '0 0 16px #fff7e0, 0 0 32px #d2b77c',
             letterSpacing: '0.12em',
           }}
         >
-          Foofur Burn Chaos
+          FOOFUR BURN CHAOS
         </h1>
         <div className="flex flex-col items-center w-full">
           <Image
@@ -102,7 +162,6 @@ const Home = () => {
               textShadow: '0 0 8px #fff7e0',
               minWidth: 200,
               maxWidth: 320,
-              //background: 'radial-gradient(ellipse at 50% 30%, #d2b77c 60%, #8c6b3f 100%)',
               border: 'none',
             }}
           >
@@ -157,24 +216,32 @@ const Home = () => {
             alt="Burn"
             width={160}
             height={80}
-            className="transition-transform duration-200 group-hover:scale-110"
+            className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-hover:shadow-[0_0_24px_8px_#cc3d3d] group-active:animate-shake-micro"
             style={{
               imageRendering: 'pixelated',
               opacity: phase !== 'idle' ? 0.7 : 1,
               cursor: phase !== 'idle' ? 'not-allowed' : 'pointer',
               display: 'block',
               borderRadius: '8px',
-              //boxShadow: '0 0 2px 2px #cc3d3d',
             }}
             priority
           />
         </button>
 
         {/* Leaderboard direct onder de burn button */}
-        <Leaderboard
-          burnedTokens={burnedTokens}
-        />
+        <Leaderboard burnedTokens={burnedTokens} />
       </main>
+
+      {/* Reward Modal */}
+      {showRewardModal && reward && (
+        <>
+          {console.debug('Rendering RewardModal with', reward)}
+          <RewardModal reward={reward} onClose={handleCloseRewardModal} />
+        </>
+      )}
+
+      {/* Confetti */}
+      {showConfetti && <Confetti width={width} height={height} />}
 
       {/* Footer */}
       <footer

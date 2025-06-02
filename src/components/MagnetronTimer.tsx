@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 type MagnetronTimerProps = {
   seconds: number;
@@ -7,19 +7,26 @@ type MagnetronTimerProps = {
 
 const MagnetronTimer: React.FC<MagnetronTimerProps> = ({ seconds, onDone }) => {
   const [time, setTime] = useState(seconds);
+  const doneCalled = useRef(false);
 
+  // Reset timer als seconds verandert (bij nieuwe burn)
   useEffect(() => {
     setTime(seconds);
+    doneCalled.current = false;
   }, [seconds]);
 
   useEffect(() => {
-    if (time === 0) {
+    if (time === 0 && !doneCalled.current) {
+      doneCalled.current = true;
       onDone();
       return;
     }
+    if (time <= 0) return;
+
     const interval = setInterval(() => {
       setTime((t) => t - 1);
     }, 1000);
+
     return () => clearInterval(interval);
   }, [time, onDone]);
 
