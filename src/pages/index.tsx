@@ -169,6 +169,75 @@ const Home = () => {
       <Header />
 
       <header className="w-full flex flex-col items-center pt-4 pb-2 relative">
+        {/* Ballon afbeelding linksboven angel */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '270px',
+            top: '60px',
+            zIndex: 20,
+            pointerEvents: 'none',
+            width: 240, // zelfde als ballon
+            height: 360, // zelfde als ballon
+          }}
+        >
+          <Image
+            src="/images/ballon.png"
+            alt="Ballon"
+            width={240}
+            height={360}
+            className="pixelated"
+            style={{
+              imageRendering: 'pixelated',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            }}
+            priority
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '30%', // pas aan voor verticale positie in de ballon
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '80%',
+              textAlign: 'center',
+              color: '#3a2f1b',
+              fontFamily: "'Press Start 2P', system-ui, sans-serif",
+              fontSize: '2.2rem',
+              textShadow: '0 0 8px #fffbe8, 0 0 2px #d2b77c',
+              zIndex: 21,
+              pointerEvents: 'none',
+              lineHeight: 1.2,
+            }}
+          >
+            Woof!
+          </div>
+        </div>
+        {/* Ballon afbeelding rechtsboven duvel, gespiegeld */}
+        <div
+          style={{
+            position: 'absolute',
+            right: '250px', // zelfde afstand van rechts als links
+            top: '90px',
+            zIndex: 20,
+            pointerEvents: 'none',
+            transform: 'scaleX(-1)', // spiegel de ballon horizontaal
+          }}
+        >
+          <Image
+            src="/images/ballon.png"
+            alt="Ballon"
+            width={240}
+            height={360}
+            className="pixelated"
+            style={{
+              imageRendering: 'pixelated',
+            }}
+            priority
+          />
+        </div>
         <h1
           className="text-3xl md:text-5xl font-bold tracking-widest text-center mb-2 uppercase"
           style={{
@@ -186,8 +255,8 @@ const Home = () => {
             className="hidden md:block"
             style={{
               position: 'absolute',
-              left: '64px',      // afstand van de linkerkant
-              bottom: '-220px',  // afstand van onderen
+              left: '64px',
+              bottom: '-220px',
               zIndex: 10,
             }}
           >
@@ -225,8 +294,8 @@ const Home = () => {
             className="hidden md:block"
             style={{
               position: 'absolute',
-              right: '64px',     // afstand van de rechterkant, zelfde als angel links
-              bottom: '-220px',  // afstand van onderen, zelfde als angel
+              right: '64px',
+              bottom: '-220px',
               zIndex: 10,
             }}
           >
