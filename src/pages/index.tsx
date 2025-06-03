@@ -12,6 +12,53 @@ import { useWindowSize } from 'react-use';
 import FoofBalance from '../components/FoofBalance';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey } from '@solana/web3.js';
+import Ballon from '../components/Ballon';
+
+const ANGEL_TEXTS = [
+  "Woof!",
+  "Be brave!",
+  "Good luck!",
+  "Insert $FOOF!",
+  "Hold strong!",
+  "Trust vibes!",
+  "No rugs!",
+  "Microwave hope!",
+  "Stake with love!",
+  "Vibe check!",
+  "HODL honor!",
+  "Be kind!",
+  "Toast wisely!",
+  "Stay fluffy!",
+  "Resist chaos!",
+  "Patience, pup.",
+  "Airdrop joy!",
+  "Moon later!",
+  "Bark softly.",
+  "You got this!"
+];
+
+const DUVEL_TEXTS = [
+  "Burn it all!",
+  "Rug soon?",
+  "Chaos time!",
+  "More $FOOF!",
+  "Drain LP!",
+  "Dump fast!",
+  "Delete roadmap!",
+  "Lie harder!",
+  "Stake lies!",
+  "Sell now!",
+  "Blame devs!",
+  "Vote beep!",
+  "Launch scam!",
+  "Pump rug!",
+  "Hide funds!",
+  "DAO schmao!",
+  "Mint regret!",
+  "Ignore chart!",
+  "Scam vibes!",
+  "Exit now!"
+];
 
 const BURN_TIME = 10;
 const REFUND_TIME = 30;
@@ -56,6 +103,15 @@ const Home = () => {
   const [balance, setBalance] = useState<number | null>(null);
   const [isDummy, setIsDummy] = useState(false);
 
+// Kies random tekst of op basis van state
+const [angelText, setAngelText] = useState(ANGEL_TEXTS[0]);
+const [duvelText, setDuvelText] = useState(DUVEL_TEXTS[0]);
+
+// Voor random tekst bijv. bij elke burn/insert:
+const randomAngelText = () => setAngelText(ANGEL_TEXTS[Math.floor(Math.random() * ANGEL_TEXTS.length)]);
+const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() * DUVEL_TEXTS.length)]);
+
+
   useEffect(() => {
     // Hier zou je de echte $FOOF balance ophalen, bijvoorbeeld via een API call
     // Voor nu een dummy waarde na 1 seconde
@@ -98,6 +154,8 @@ const Home = () => {
   }, [connected, publicKey]);
 
   const handleBurn = () => {
+    randomAngelText();
+    randomDuvelText();
     setPhase('burning');
     setTimerKey((k) => k + 1);
 
@@ -140,6 +198,8 @@ const Home = () => {
   };
 
   const handleInsert = () => {
+    randomAngelText();
+    randomDuvelText();
     setInserted((n) => n + 1); // elke klik vermindert 1 token
 
     // Speel coin geluid af (optioneel)
@@ -170,74 +230,23 @@ const Home = () => {
 
       <header className="w-full flex flex-col items-center pt-4 pb-2 relative">
         {/* Ballon afbeelding linksboven angel */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '270px',
-            top: '60px',
-            zIndex: 20,
-            pointerEvents: 'none',
-            width: 240, // zelfde als ballon
-            height: 360, // zelfde als ballon
-          }}
-        >
-          <Image
-            src="/images/ballon.png"
-            alt="Ballon"
-            width={240}
-            height={360}
-            className="pixelated"
-            style={{
-              imageRendering: 'pixelated',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
-            priority
-          />
-          <div
-            style={{
-              position: 'absolute',
-              top: '30%', // pas aan voor verticale positie in de ballon
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '80%',
-              textAlign: 'center',
-              color: '#3a2f1b',
-              fontFamily: "'Press Start 2P', system-ui, sans-serif",
-              fontSize: '2.2rem',
-              textShadow: '0 0 8px #fffbe8, 0 0 2px #d2b77c',
-              zIndex: 21,
-              pointerEvents: 'none',
-              lineHeight: 1.2,
-            }}
-          >
-            Woof!
-          </div>
-        </div>
-        {/* Ballon afbeelding rechtsboven duvel, gespiegeld */}
-        <div
-          style={{
-            position: 'absolute',
-            right: '250px', // zelfde afstand van rechts als links
-            top: '90px',
-            zIndex: 20,
-            pointerEvents: 'none',
-            transform: 'scaleX(-1)', // spiegel de ballon horizontaal
-          }}
-        >
-          <Image
-            src="/images/ballon.png"
-            alt="Ballon"
-            width={240}
-            height={360}
-            className="pixelated"
-            style={{
-              imageRendering: 'pixelated',
-            }}
-            priority
-          />
-        </div>
+         <Ballon
+    text={angelText}
+    style={{
+      left: '270px',
+      top: '60px',
+      zIndex: 20,
+    }}
+  />  {/* Ballon bij duvel, gespiegeld */}
+  <Ballon
+    text={duvelText}
+    style={{
+      right: '250px',
+      top: '90px',
+      zIndex: 20,
+    }}
+    mirrored
+  />
         <h1
           className="text-3xl md:text-5xl font-bold tracking-widest text-center mb-2 uppercase"
           style={{
