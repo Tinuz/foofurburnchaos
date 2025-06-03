@@ -251,19 +251,19 @@ const Home = () => {
               text={angelText}
               style={{
                 left: isMobile ? "23vw" : "280px",
-                top: isMobile ? "13vw" : "10px",
+                top: isMobile ? "10vw" : "10px",
                 zIndex: 20,
-                transform: isMobile ? "scale(0.4)" : "none",
+                transform: isMobile ? "scale(0.5)" : "none",
                 transformOrigin: "top left",
               }}
             />
             <Ballon
               text={duvelText}
               style={{
-                right: isMobile ? "8vw" : "250px",
-                top: isMobile ? "15vw" : "30px",
+                right: isMobile ? "4vw" : "250px",
+                top: isMobile ? "12vw" : "30px",
                 zIndex: 20,
-                transform: isMobile ? "scale(0.4)" : "none",
+                transform: isMobile ? "scale(0.5)" : "none",
                 transformOrigin: "top right",
               }}
               mirrored
@@ -431,91 +431,76 @@ const Home = () => {
 
       {/* Burn Action */}
       <main className="flex flex-col items-center w-full pb-8">
-        {mounted && (
-          <div
-            className="flex md:gap-4 gap-1"
+        <div className="flex gap-1 md:gap-4 justify-center items-center relative z-20">
+          <button
+            className="relative group focus:outline-none mt-2 mb-2 w-20 h-10 md:w-40 md:h-20"
             style={{
-              justifyContent: "center",
-              alignItems: "center",
-              transform: isMobile ? "scale(0.5)" : "none",
-              transformOrigin: "center",
+              border: "none",
+              background: "transparent",
+              padding: 0,
+              boxShadow: "none",
             }}
+            onClick={handleBurn}
+            aria-label="Burn"
+            disabled={phase !== "idle" || disableActions}
           >
-            {mounted && (
-              <button
-                className="relative group focus:outline-none mt-2 mb-2"
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  padding: 0,
-                  boxShadow: "none",
-                }}
-                onClick={handleBurn}
-                aria-label="Burn"
-                disabled={phase !== "idle" || disableActions}
-              >
-                <Image
-                  src="/images/burn.png"
-                  alt="Burn"
-                  width={160}
-                  height={80}
-                  className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
-                  style={{
-                    imageRendering: "pixelated",
-                    opacity: phase !== "idle" ? 0.7 : 1,
-                    cursor: phase !== "idle" ? "not-allowed" : "pointer",
-                    display: "block",
-                    borderRadius: 0,
-                    background: "transparent",
-                  }}
-                  priority
-                />
-              </button>
-            )}
-
-            {mounted && (
-              <button
-                className="ml-2 relative group focus:outline-none mt-2 mb-2"
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  padding: 0,
-                  boxShadow: "none",
-                }}
-                onClick={handleInsert}
-                aria-label="Insert"
-                disabled={phase !== "idle" || disableActions}
-              >
-                <Image
-                  src="/images/insert.png"
-                  alt="Insert"
-                  width={180}
-                  height={90}
-                  className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
-                  style={{
-                    imageRendering: "pixelated",
-                    opacity: phase !== "idle" ? 0.7 : 1,
-                    cursor: phase !== "idle" ? "not-allowed" : "pointer",
-                    display: "block",
-                    borderRadius: 0,
-                    background: "transparent",
-                  }}
-                  priority
-                />
-                <span
-                  className="absolute inset-0 flex items-center justify-center font-bold text-xl"
-                  style={{
-                    color: "#3a2f1b",
-                    fontFamily: "'Press Start 2P', monospace",
-                    pointerEvents: "none",
-                    textShadow: "0 0 8px #fffbe8, 0 0 2px #d2b77c",
-                    letterSpacing: "0.08em",
-                  }}
-                ></span>
-              </button>
-            )}
-          </div>
-        )}
+            <Image
+              src="/images/burn.png"
+              alt="Burn"
+              width={160}
+              height={80}
+              className="w-full h-full transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
+              style={{
+                imageRendering: "pixelated",
+                opacity: phase !== "idle" ? 0.7 : 1,
+                cursor: phase !== "idle" ? "not-allowed" : "pointer",
+                display: "block",
+                borderRadius: 0,
+                background: "transparent",
+              }}
+              priority
+            />
+          </button>
+          <button
+            className="ml-2 relative group focus:outline-none mt-2 mb-2 w-24 h-12 md:w-44 md:h-24"
+            style={{
+              border: "none",
+              background: "transparent",
+              padding: 0,
+              boxShadow: "none",
+            }}
+            onClick={handleInsert}
+            aria-label="Insert"
+            disabled={phase !== "idle" || disableActions}
+          >
+            <Image
+              src="/images/insert.png"
+              alt="Insert"
+              width={180}
+              height={90}
+              className="w-full h-full transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
+              style={{
+                imageRendering: "pixelated",
+                opacity: phase !== "idle" ? 0.7 : 1,
+                cursor: phase !== "idle" ? "not-allowed" : "pointer",
+                display: "block",
+                borderRadius: 0,
+                background: "transparent",
+              }}
+              priority
+            />
+            <span
+              className="absolute inset-0 flex items-center justify-center font-bold text-xl"
+              style={{
+                color: "#3a2f1b",
+                fontFamily: "'Press Start 2P', monospace",
+                pointerEvents: "none",
+                textShadow: "0 0 8px #fffbe8, 0 0 2px #d2b77c",
+                letterSpacing: "0.08em",
+              }}
+            ></span>
+          </button>
+        </div>
         <Leaderboard burnedTokens={burnedTokens} />
       </main>
 

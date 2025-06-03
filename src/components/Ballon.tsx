@@ -51,12 +51,18 @@ const Ballon = ({ text, style, mirrored = false }: BallonProps) => {
           textAlign: 'center',
           color: '#3a2f1b',
           fontFamily: "'Press Start 2P', system-ui, sans-serif",
-          fontSize: isMobile ? '1rem' : '2.2rem', // responsive fontgrootte
-          textShadow: '0 0 8px #fffbe8, 0 0 2px #d2b77c',
+          fontSize: isMobile
+      ? 'clamp(0.7rem, 3vw, 1rem)'
+      : 'clamp(1.2rem, 2.5vw, 2.2rem)',
+    textShadow: '0 0 8px #fffbe8, 0 0 2px #d2b77c',
           zIndex: 21,
           pointerEvents: 'none',
           lineHeight: 1.2,
           wordBreak: 'break-word',
+          overflowWrap: 'break-word',
+    whiteSpace: 'pre-line',
+    maxHeight: '80%',
+    overflowY: 'auto',
         }}
       >
         {text}
