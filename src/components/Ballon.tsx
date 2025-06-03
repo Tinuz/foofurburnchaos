@@ -46,7 +46,7 @@ const Ballon = ({ text, style, mirrored = false }: BallonProps) => {
           textAlign: 'center',
           color: '#3a2f1b',
           fontFamily: "'Press Start 2P', system-ui, sans-serif",
-          fontSize: isMobile ? '1rem' : '2.2rem',
+          fontSize: isMobile ? '0.75rem' : '2.2rem',
           textShadow: '0 0 8px #fffbe8, 0 0 2px #d2b77c',
           zIndex: 21,
           pointerEvents: 'none',
