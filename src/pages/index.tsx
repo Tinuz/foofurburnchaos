@@ -401,7 +401,7 @@ const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() 
       )}
 
       {/* Burn Action */}
-      <main className="flex flex-col items-center w-full flex-1 justify-end pb-8">
+      <main className="flex flex-col items-center w-full  pb-8">
         <div className="flex gap-4">
           <button
             className="relative group focus:outline-none mt-2 mb-2"
