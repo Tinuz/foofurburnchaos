@@ -91,6 +91,8 @@ function getRandomReward() {
 const FOOF_MINT = 'J5k8QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw'; // <-- Vervang door echte mint!
 
 const Home = () => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
+
   const [phase, setPhase] = useState<'idle' | 'burning' | 'feedback' | 'refund'>('idle');
   const [timerKey, setTimerKey] = useState(0);
   const [burnedTokens, setBurnedTokens] = useState(0);
@@ -231,18 +233,22 @@ const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() 
       <header className="w-full flex flex-col items-center pt-4 pb-2 relative">
         {/* Ballon afbeelding linksboven angel */}
          <Ballon
-    text={angelText}
-    style={{
-      left: '270px',
-      top: '60px',
-      zIndex: 20,
-    }}
-  />  {/* Ballon bij duvel, gespiegeld */}
+  text={angelText}
+  style={{
+    left: isMobile ? '19vw' : '270px',
+    top: isMobile ? '13vw' : '60px',
+    zIndex: 20,
+    width: isMobile ? 70 : 240,
+    height: isMobile ? 100 : 360,
+  }}
+/>  {/* Ballon bij duvel, gespiegeld */}
   <Ballon
     text={duvelText}
     style={{
-      right: '250px',
-      top: '90px',
+      right: isMobile ? '19vw': '250px',
+      top: isMobile ? '13vw': '90px',
+      width: isMobile ? 70 : 240,
+    height: isMobile ? 100 : 360,
       zIndex: 20,
     }}
     mirrored
@@ -261,25 +267,27 @@ const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() 
         <div className="flex flex-row items-center w-full justify-center relative">
           {/* Angel image absoluut gepositioneerd links onder */}
           <div
-            className="hidden md:block"
+            className="" //className="hidden md:block"
             style={{
-              position: 'absolute',
-              left: '64px',
-              bottom: '-220px',
+             position: 'absolute',
+    left: isMobile ? '7vw' : '64px',
+    bottom: isMobile ? '-20px' : '-220px',
+    width: isMobile ? '80px' : '320px',
+    height: isMobile ? '120px' : '480px',
               zIndex: 10,
             }}
           >
             <Image
               src="/images/angel.png"
               alt="Angel"
-              width={320}
-              height={480}
-              className="pixelated"
-              style={{
-                imageRendering: 'pixelated',
-                maxHeight: 480,
-                width: 'auto',
-              }}
+               width={isMobile ? 60 : 320}
+  height={isMobile ? 100 : 480}
+  className="pixelated"
+  style={{
+    imageRendering: 'pixelated',
+    maxHeight: isMobile ? 120 : 480,
+    width: 'auto',
+  }}
               priority
             />
           </div>
@@ -300,25 +308,27 @@ const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() 
           />
           {/* Duvel image absoluut gepositioneerd rechts onder */}
           <div
-            className="hidden md:block"
+            className="" //className="hidden md:block"
             style={{
               position: 'absolute',
-              right: '64px',
-              bottom: '-220px',
+    right: isMobile ? '5vw' : '64px',
+    bottom: isMobile ? '-20px' : '-220px',
+    width: isMobile ? '80px' : '320px',
+    height: isMobile ? '120px' : '480px',
               zIndex: 10,
             }}
           >
             <Image
               src="/images/duvel.png"
               alt="Duvel"
-              width={320}
-              height={480}
-              className="pixelated"
-              style={{
-                imageRendering: 'pixelated',
-                maxHeight: 480,
-                width: 'auto',
-              }}
+               width={isMobile ? 60 : 320}
+  height={isMobile ? 100 : 480}
+  className="pixelated"
+  style={{
+    imageRendering: 'pixelated',
+    maxHeight: isMobile ? 120 : 480,
+    width: 'auto',
+  }}
               priority
             />
           </div>
@@ -408,8 +418,8 @@ const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() 
             <Image
               src="/images/burn.png"
               alt="Burn"
-              width={160}
-              height={80}
+              width={isMobile ? 80 : 160}      // kleiner op mobiel
+              height={isMobile ? 40 : 80}      // kleiner op mobiel
               className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
               style={{
                 imageRendering: 'pixelated',
@@ -437,8 +447,8 @@ const randomDuvelText = () => setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() 
             <Image
               src="/images/insert.png"
               alt="Insert"
-              width={180}
-              height={90}
+              width={isMobile ? 90 : 180}      // kleiner op mobiel
+              height={isMobile ? 45 : 90}      // kleiner op mobiel
               className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
               style={{
                 imageRendering: 'pixelated',

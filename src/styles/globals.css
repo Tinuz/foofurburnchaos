@@ -33,3 +33,8 @@ button:hover {
 .burn-button {
     @apply w-full h-16 flex items-center justify-center;
 }
+
+@media (max-width: 600px) {
+  .pixelated { max-width: 100px !important; max-height: 150px !important; }
+  .ballon-text { font-size: 1rem !important; }
+}
