@@ -180,7 +180,32 @@ const Home = () => {
         >
           FOOFUR BURN CHAOS
         </h1>
-        <div className="flex flex-col items-center w-full">
+        <div className="flex flex-row items-center w-full justify-center relative">
+          {/* Angel image absoluut gepositioneerd links onder */}
+          <div
+            className="hidden md:block"
+            style={{
+              position: 'absolute',
+              left: '64px',      // afstand van de linkerkant
+              bottom: '-220px',  // afstand van onderen
+              zIndex: 10,
+            }}
+          >
+            <Image
+              src="/images/angel.png"
+              alt="Angel"
+              width={320}
+              height={480}
+              className="pixelated"
+              style={{
+                imageRendering: 'pixelated',
+                maxHeight: 480,
+                width: 'auto',
+              }}
+              priority
+            />
+          </div>
+          {/* Microwave blijft gecentreerd */}
           <Image
             src="/images/microwave.png"
             alt="Microwave"
@@ -195,18 +220,42 @@ const Home = () => {
             }}
             priority
           />
-          <p
-            className="text-base md:text-lg text-center mb-1"
+          {/* Duvel image absoluut gepositioneerd rechts onder */}
+          <div
+            className="hidden md:block"
             style={{
-              fontFamily: "Inter, system-ui, sans-serif",
-              color: '#3a2f1b',
-              textShadow: '0 0 8px #fff7e0',
-              letterSpacing: '0.04em',
+              position: 'absolute',
+              right: '64px',     // afstand van de rechterkant, zelfde als angel links
+              bottom: '-220px',  // afstand van onderen, zelfde als angel
+              zIndex: 10,
             }}
           >
-            Insert $FOOF. Press Burn. Hope for Chaos.
-          </p>
+            <Image
+              src="/images/duvel.png"
+              alt="Duvel"
+              width={320}
+              height={480}
+              className="pixelated"
+              style={{
+                imageRendering: 'pixelated',
+                maxHeight: 480,
+                width: 'auto',
+              }}
+              priority
+            />
+          </div>
         </div>
+        <p
+          className="text-base md:text-lg text-center mb-1"
+          style={{
+            fontFamily: "Inter, system-ui, sans-serif",
+            color: '#3a2f1b',
+            textShadow: '0 0 8px #fff7e0',
+            letterSpacing: '0.04em',
+          }}
+        >
+          Insert $FOOF. Press Burn. Hope for Chaos.
+        </p>
       </header>
 
       {/* Magnetron burn-timer */}
