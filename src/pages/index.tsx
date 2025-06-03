@@ -110,6 +110,7 @@ const Home = () => {
   const { publicKey, connected } = useWallet();
   const [balance, setBalance] = useState<number | null>(null);
   const [isDummy, setIsDummy] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Kies random tekst of op basis van state
   const [angelText, setAngelText] = useState(ANGEL_TEXTS[0]);
@@ -120,6 +121,10 @@ const Home = () => {
     setAngelText(ANGEL_TEXTS[Math.floor(Math.random() * ANGEL_TEXTS.length)]);
   const randomDuvelText = () =>
     setDuvelText(DUVEL_TEXTS[Math.floor(Math.random() * DUVEL_TEXTS.length)]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Hier zou je de echte $FOOF balance ophalen, bijvoorbeeld via een API call
@@ -240,29 +245,31 @@ const Home = () => {
       <Header />
 
       <header className="w-full flex flex-col items-center pt-4 pb-2 relative">
-        {/* Ballon afbeelding linksboven angel */}
-        <Ballon
-          text={angelText}
-          style={{
-            left: isMobile ? "19vw" : "270px",
-            top: isMobile ? "13vw" : "60px",
-            zIndex: 20,
-            width: isMobile ? 70 : 240,
-            height: isMobile ? 100 : 360,
-          }}
-        />{" "}
-        {/* Ballon bij duvel, gespiegeld */}
-        <Ballon
-          text={duvelText}
-          style={{
-            right: isMobile ? "19vw" : "250px",
-            top: isMobile ? "13vw" : "90px",
-            width: isMobile ? 70 : 240,
-            height: isMobile ? 100 : 360,
-            zIndex: 20,
-          }}
-          mirrored
-        />
+        {mounted && (
+          <>
+            <Ballon
+              text={angelText}
+              style={{
+                left: isMobile ? "23vw" : "280px",
+                top: isMobile ? "13vw" : "10px",
+                zIndex: 20,
+                transform: isMobile ? "scale(0.4)" : "none",
+                transformOrigin: "top left",
+              }}
+            />
+            <Ballon
+              text={duvelText}
+              style={{
+                right: isMobile ? "8vw" : "250px",
+                top: isMobile ? "15vw" : "30px",
+                zIndex: 20,
+                transform: isMobile ? "scale(0.4)" : "none",
+                transformOrigin: "top right",
+              }}
+              mirrored
+            />
+          </>
+        )}
         <h1
           className="text-3xl md:text-5xl font-bold tracking-widest text-center mb-2 uppercase"
           style={{
@@ -276,31 +283,34 @@ const Home = () => {
         </h1>
         <div className="flex flex-row items-center w-full justify-center relative">
           {/* Angel image absoluut gepositioneerd links onder */}
-          <div
-            className="" //className="hidden md:block"
-            style={{
-              position: "absolute",
-              left: isMobile ? "7vw" : "64px",
-              bottom: isMobile ? "-20px" : "-220px",
-              width: isMobile ? "80px" : "320px",
-              height: isMobile ? "120px" : "480px",
-              zIndex: 10,
-            }}
-          >
-            <Image
-              src="/images/angel.png"
-              alt="Angel"
-              width={isMobile ? 60 : 320}
-              height={isMobile ? 100 : 480}
-              className="pixelated"
+          {mounted && (
+            <div
               style={{
-                imageRendering: "pixelated",
-                maxHeight: isMobile ? 120 : 480,
-                width: "auto",
+                position: "absolute",
+                left: isMobile ? "12vw" : "64px",
+                bottom: isMobile ? "-190px" : "-220px",
+                width: "320px",
+                height: "480px",
+                zIndex: 10,
+                transform: isMobile ? "scale(0.6)" : "none",
+                transformOrigin: "bottom left",
               }}
-              priority
-            />
-          </div>
+            >
+              <Image
+                src="/images/angel.png"
+                alt="Angel"
+                width={320}
+                height={480}
+                className="pixelated"
+                style={{
+                  imageRendering: "pixelated",
+                  width: "100%",
+                  height: "auto",
+                }}
+                priority
+              />
+            </div>
+          )}
           {/* Microwave blijft gecentreerd */}
           <Image
             src="/images/microwave.png"
@@ -319,31 +329,34 @@ const Home = () => {
             priority
           />
           {/* Duvel image absoluut gepositioneerd rechts onder */}
-          <div
-            className="" //className="hidden md:block"
-            style={{
-              position: "absolute",
-              right: isMobile ? "5vw" : "64px",
-              bottom: isMobile ? "-20px" : "-220px",
-              width: isMobile ? "80px" : "320px",
-              height: isMobile ? "120px" : "480px",
-              zIndex: 10,
-            }}
-          >
-            <Image
-              src="/images/duvel.png"
-              alt="Duvel"
-              width={isMobile ? 60 : 320}
-              height={isMobile ? 100 : 480}
-              className="pixelated"
+          {mounted && (
+            <div
               style={{
-                imageRendering: "pixelated",
-                maxHeight: isMobile ? 120 : 480,
-                width: "auto",
+                position: "absolute",
+                right: isMobile ? "-22vw" : "64px",
+                bottom: isMobile ? "-190px" : "-220px",
+                width: "320px",
+                height: "480px",
+                zIndex: 10,
+                transform: isMobile ? "scale(0.6)" : "none",
+                transformOrigin: "bottom right",
               }}
-              priority
-            />
-          </div>
+            >
+              <Image
+                src="/images/duvel.png"
+                alt="Duvel"
+                width={320}
+                height={480}
+                className="pixelated"
+                style={{
+                  imageRendering: "pixelated",
+                  width: "100%",
+                  height: "auto",
+                }}
+                priority
+              />
+            </div>
+          )}
         </div>
         <p
           className="text-base md:text-lg text-center mb-1"
@@ -417,78 +430,92 @@ const Home = () => {
       )}
 
       {/* Burn Action */}
-      <main className="flex flex-col items-center w-full  pb-8">
-        <div className="flex gap-4">
-          <button
-            className="relative group focus:outline-none mt-2 mb-2"
+      <main className="flex flex-col items-center w-full pb-8">
+        {mounted && (
+          <div
+            className="flex md:gap-4 gap-1"
             style={{
-              border: "none",
-              background: "transparent",
-              padding: 0,
-              boxShadow: "none",
+              justifyContent: "center",
+              alignItems: "center",
+              transform: isMobile ? "scale(0.5)" : "none",
+              transformOrigin: "center",
             }}
-            onClick={handleBurn}
-            aria-label="Burn"
-            disabled={phase !== "idle" || disableActions}
           >
-            <Image
-              src="/images/burn.png"
-              alt="Burn"
-              width={isMobile ? 80 : 160} // kleiner op mobiel
-              height={isMobile ? 40 : 80} // kleiner op mobiel
-              className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
-              style={{
-                imageRendering: "pixelated",
-                opacity: phase !== "idle" ? 0.7 : 1,
-                cursor: phase !== "idle" ? "not-allowed" : "pointer",
-                display: "block",
-                borderRadius: 0,
-                background: "transparent",
-              }}
-              priority
-            />
-          </button>
-          <button
-            className="ml-2 relative group focus:outline-none mt-2 mb-2"
-            style={{
-              border: "none",
-              background: "transparent",
-              padding: 0,
-              boxShadow: "none",
-            }}
-            onClick={handleInsert}
-            aria-label="Insert"
-            disabled={phase !== "idle" || disableActions}
-          >
-            <Image
-              src="/images/insert.png"
-              alt="Insert"
-              width={isMobile ? 90 : 180} // kleiner op mobiel
-              height={isMobile ? 45 : 90} // kleiner op mobiel
-              className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
-              style={{
-                imageRendering: "pixelated",
-                opacity: phase !== "idle" ? 0.7 : 1,
-                cursor: phase !== "idle" ? "not-allowed" : "pointer",
-                display: "block",
-                borderRadius: 0,
-                background: "transparent",
-              }}
-              priority
-            />
-            <span
-              className="absolute inset-0 flex items-center justify-center font-bold text-xl"
-              style={{
-                color: "#3a2f1b",
-                fontFamily: "'Press Start 2P', monospace",
-                pointerEvents: "none",
-                textShadow: "0 0 8px #fffbe8, 0 0 2px #d2b77c",
-                letterSpacing: "0.08em",
-              }}
-            ></span>
-          </button>
-        </div>
-        {/* Leaderboard direct onder de burn button */}
+            {mounted && (
+              <button
+                className="relative group focus:outline-none mt-2 mb-2"
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  boxShadow: "none",
+                }}
+                onClick={handleBurn}
+                aria-label="Burn"
+                disabled={phase !== "idle" || disableActions}
+              >
+                <Image
+                  src="/images/burn.png"
+                  alt="Burn"
+                  width={160}
+                  height={80}
+                  className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
+                  style={{
+                    imageRendering: "pixelated",
+                    opacity: phase !== "idle" ? 0.7 : 1,
+                    cursor: phase !== "idle" ? "not-allowed" : "pointer",
+                    display: "block",
+                    borderRadius: 0,
+                    background: "transparent",
+                  }}
+                  priority
+                />
+              </button>
+            )}
+
+            {mounted && (
+              <button
+                className="ml-2 relative group focus:outline-none mt-2 mb-2"
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  padding: 0,
+                  boxShadow: "none",
+                }}
+                onClick={handleInsert}
+                aria-label="Insert"
+                disabled={phase !== "idle" || disableActions}
+              >
+                <Image
+                  src="/images/insert.png"
+                  alt="Insert"
+                  width={180}
+                  height={90}
+                  className="transition-all duration-300 group-hover:scale-105 group-hover:animate-pulse group-active:animate-shake-micro"
+                  style={{
+                    imageRendering: "pixelated",
+                    opacity: phase !== "idle" ? 0.7 : 1,
+                    cursor: phase !== "idle" ? "not-allowed" : "pointer",
+                    display: "block",
+                    borderRadius: 0,
+                    background: "transparent",
+                  }}
+                  priority
+                />
+                <span
+                  className="absolute inset-0 flex items-center justify-center font-bold text-xl"
+                  style={{
+                    color: "#3a2f1b",
+                    fontFamily: "'Press Start 2P', monospace",
+                    pointerEvents: "none",
+                    textShadow: "0 0 8px #fffbe8, 0 0 2px #d2b77c",
+                    letterSpacing: "0.08em",
+                  }}
+                ></span>
+              </button>
+            )}
+          </div>
+        )}
         <Leaderboard burnedTokens={burnedTokens} />
       </main>
 
