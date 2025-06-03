@@ -7,49 +7,14 @@ import Image from 'next/image';
 const FOOF_MINT = 'J5k8QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw'; // <-- Vervang door echte mint!
 
 type FoofBalanceProps = {
-  onInsert?: () => void;
+  balance: number | null;
+  isDummy: boolean;
   inserted?: number;
 };
 
-const FoofBalance = ({ inserted = 0 }: FoofBalanceProps) => {
-  const { publicKey, connected } = useWallet();
-  const [balance, setBalance] = useState<number | null>(null);
-  const [isDummy, setIsDummy] = useState(false);
-
-  useEffect(() => {
-    if (!publicKey) {
-      setBalance(null);
-      setIsDummy(false);
-      return;
-    }
-    const connection = new Connection('https://api.mainnet-beta.solana.com');
-    const getBalance = async () => {
-      try {
-        // SPL Token account ophalen
-        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-          mint: new PublicKey(FOOF_MINT),
-        });
-        const amount =
-          tokenAccounts.value[0]?.account.data.parsed.info.tokenAmount.uiAmount || 0;
-        if (amount === 0) {
-          setBalance(10000);
-          setIsDummy(true);
-        } else {
-          setBalance(amount);
-          setIsDummy(false);
-        }
-      } catch {
-        setBalance(10000);
-        setIsDummy(true);
-      }
-    };
-    getBalance();
-  }, [publicKey]);
-
-  if (!connected || !publicKey) return null;
-
-  // Pas de getoonde balance aan met het aantal inserted tokens
-  const displayBalance = balance !== null ? Math.max(0, balance - inserted) : '...';
+const FoofBalance = ({ balance, isDummy, inserted = 0 }: FoofBalanceProps) => {
+  if (balance === null) return null;
+  const displayBalance = Math.max(0, balance - inserted);
 
   return (
     <div

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '../components/Header';
@@ -10,6 +10,8 @@ import RewardModal from '../components/RewardModal';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import FoofBalance from '../components/FoofBalance';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { Connection, PublicKey } from '@solana/web3.js';
 
 const BURN_TIME = 10;
 const REFUND_TIME = 30;
@@ -39,6 +41,8 @@ function getRandomReward() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+const FOOF_MINT = 'J5k8QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw'; // <-- Vervang door echte mint!
+
 const Home = () => {
   const [phase, setPhase] = useState<'idle' | 'burning' | 'feedback' | 'refund'>('idle');
   const [timerKey, setTimerKey] = useState(0);
@@ -48,6 +52,50 @@ const Home = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [inserted, setInserted] = useState(0);
   const { width, height } = useWindowSize();
+  const { publicKey, connected } = useWallet();
+  const [balance, setBalance] = useState<number | null>(null);
+  const [isDummy, setIsDummy] = useState(false);
+
+  useEffect(() => {
+    // Hier zou je de echte $FOOF balance ophalen, bijvoorbeeld via een API call
+    // Voor nu een dummy waarde na 1 seconde
+    if (connected && publicKey) {
+      setTimeout(() => {
+        setBalance(100); // Dummy balance
+      }, 1000);
+    } else {
+      setBalance(null);
+    }
+  }, [connected, publicKey]);
+
+  useEffect(() => {
+    if (!connected || !publicKey) {
+      setBalance(null);
+      setIsDummy(false);
+      return;
+    }
+    const connection = new Connection('https://api.mainnet-beta.solana.com');
+    const getBalance = async () => {
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+          mint: new PublicKey(FOOF_MINT),
+        });
+        const amount =
+          tokenAccounts.value[0]?.account.data.parsed.info.tokenAmount.uiAmount || 0;
+        if (amount === 0) {
+          setBalance(10000);
+          setIsDummy(true);
+        } else {
+          setBalance(amount);
+          setIsDummy(false);
+        }
+      } catch {
+        setBalance(10000);
+        setIsDummy(true);
+      }
+    };
+    getBalance();
+  }, [connected, publicKey]);
 
   const handleBurn = () => {
     setPhase('burning');
@@ -98,6 +146,13 @@ const Home = () => {
     const audio = new Audio('/coin.mp3');
     audio.play().catch(() => {});
   };
+
+  // Disable knoppen als geen wallet of geen $FOOF
+  const disableActions =
+    !connected ||
+    !publicKey ||
+    balance === null ||
+    balance <= 0;
 
   return (
     <div
@@ -221,7 +276,7 @@ const Home = () => {
             }}
             onClick={handleBurn}
             aria-label="Burn"
-            disabled={phase !== 'idle'}
+            disabled={phase !== 'idle' || disableActions}
           >
             <Image
               src="/images/burn.png"
@@ -250,7 +305,7 @@ const Home = () => {
             }}
             onClick={handleInsert}
             aria-label="Insert"
-            disabled={phase !== 'idle'}
+            disabled={phase !== 'idle' || disableActions}
           >
             <Image
               src="/images/insert.png"
@@ -296,7 +351,7 @@ const Home = () => {
       {/* Confetti */}
       {showConfetti && <Confetti width={width} height={height} />}
 
-      <FoofBalance inserted={inserted} />
+      <FoofBalance balance={balance} isDummy={isDummy} inserted={inserted} />
       
       {/* Footer */}
       <footer
