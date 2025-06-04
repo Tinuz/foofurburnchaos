@@ -84,6 +84,7 @@ function getRandomReward() {
     pool = REWARDS.filter((r) => r.rarity === "rare");
   } else {
     pool = REWARDS.filter((r) => r.rarity === "legendary");
+    //await mintFoorfurNFT();
   }
   return pool[Math.floor(Math.random() * pool.length)];
 }
