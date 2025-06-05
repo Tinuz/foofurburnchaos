@@ -64,7 +64,6 @@ const DUVEL_TEXTS = [
 ];
 
 const BURN_TIME = 10;
-const REFUND_TIME = 5;
 
 const REWARDS = [
   { name: "Empty Can", image: "empty_can.png", rarity: "common" },
@@ -144,6 +143,7 @@ const Home = () => {
   const [isDummy, setIsDummy] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [leaderboard, setLeaderboard] = useState<{ wallet: string; burned: number }[]>([]);
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
 
   // Kies random tekst of op basis van state
   const [angelText, setAngelText] = useState(ANGEL_TEXTS[0]);
@@ -195,9 +195,21 @@ const Home = () => {
   }, [connected, publicKey]);
 
   useEffect(() => {
-    fetch("/api/leaderboard")
-      .then((res) => res.json())
-      .then(setLeaderboard);
+    const fetchLeaderboard = async () => {
+      try {
+        setLeaderboardError(null);
+        const res = await fetch("/api/leaderboard");
+        if (!res.ok) throw new Error("Server error");
+        const data = await res.json();
+        setLeaderboard(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setLeaderboardError(
+          "Er is iets fout gegaan met het laden van het leaderboard. Probeer de pagina opnieuw te laden."
+        );
+        setLeaderboard([]);
+      }
+    };
+    fetchLeaderboard();
   }, []);
 
   const handleBurn = async () => {
@@ -243,6 +255,18 @@ const Home = () => {
       setPhase("idle");
       return;
     }
+    // Haal balance opnieuw op na burn!
+    if (publicKey) {
+      const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL!);
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+        publicKey,
+        { mint: new PublicKey(FOOF_MINT) }
+      );
+      const amount =
+        tokenAccounts.value[0]?.account.data.parsed.info.tokenAmount.uiAmount || 0;
+      setBalance(amount);
+      setIsDummy(amount === 0);
+    }
     setPhase("burning");
     setTimerKey((k) => k + 1);
 
@@ -281,12 +305,11 @@ if (selected.rarity === "legendary") {
   };
 
   const handleCloseRewardModal = () => {
-    // Debug: check wanneer de modal gesloten wordt
-    console.debug("Reward modal closed");
     setShowRewardModal(false);
     setShowLegendaryModal(false);
+    setInserted(0);
     setTimeout(() => {
-      setPhase("refund");
+      setPhase("idle");
     }, 300);
   };
 
@@ -565,6 +588,11 @@ const disableBurn = disableInsert || inserted <= 0;
             ></span>
           </button>
         </div>
+        {leaderboardError && (
+  <div className="bg-red-100 text-red-800 p-4 rounded mb-4 text-center font-bold">
+    {leaderboardError}
+  </div>
+)}
         <Leaderboard leaderboard={leaderboard} />
       </main>
 
