@@ -8,7 +8,7 @@ import '../styles/globals.css';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 const network = WalletAdapterNetwork.Devnet;
-const endpoint = 'https://api.devnet.solana.com';
+const endpoint = 'https://mainnet.helius-rpc.com/?api-key=a360743f-773d-430c-afcd-70370fd20b87';
 
 export default function App({ Component, pageProps }: AppProps) {
   const wallets = useMemo(() => [new PhantomWalletAdapter()], []);

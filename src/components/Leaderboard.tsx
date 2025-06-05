@@ -1,10 +1,10 @@
 import React from 'react';
 
 type LeaderboardProps = {
-  burnedTokens: number;
+  leaderboard: { wallet: string; burned: number }[];
 };
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ burnedTokens }) => (
+const Leaderboard: React.FC<LeaderboardProps> = ({ leaderboard }) => (
   <div
     className="mt-8 px-6 py-4 text-center retro-modal shadow-lg"
     style={{
@@ -21,10 +21,16 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ burnedTokens }) => (
     <h2 className="text-lg font-bold mb-2" style={{ textShadow: '0 0 8px #fff7e0' }}>
       Leaderboard
     </h2>
-    <p>
-      You have burned <span className="text-[#cc3d3d]">{burnedTokens}</span> $FOOF!
-    </p>
-    {/* Add a real leaderboard list here in the future */}
+    <ul className="list-disc list-inside">
+      {leaderboard
+        .sort((a, b) => b.burned - a.burned)
+        .map((entry, i) => (
+          <li key={entry.wallet} className="text-sm">
+            <span className="font-semibold">#{i + 1}</span>{' '}
+            {entry.wallet.slice(0, 4)}...{entry.wallet.slice(-4)}: {entry.burned} FOOF
+          </li>
+        ))}
+    </ul>
   </div>
 );
 

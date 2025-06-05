@@ -2,17 +2,20 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
-import TokenRefundTimer from "../components/TokenRefundTimer";
 import MagnetronTimer from "../components/MagnetronTimer";
 import WalletConnect from "../components/WalletConnect";
 import Leaderboard from "../components/Leaderboard";
 import RewardModal from "../components/RewardModal";
+import LegendaryModal from "../components/LegendaryModal";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import FoofBalance from "../components/FoofBalance";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import Ballon from "../components/Ballon";
+import { printEditionFromMaster } from '../libs/printEdition';
+import { burnFoofToken } from "../components/BurnToken";
+
 
 const ANGEL_TEXTS = [
   "Woof!",
@@ -61,7 +64,7 @@ const DUVEL_TEXTS = [
 ];
 
 const BURN_TIME = 10;
-const REFUND_TIME = 30;
+const REFUND_TIME = 5;
 
 const REWARDS = [
   { name: "Empty Can", image: "empty_can.png", rarity: "common" },
@@ -70,26 +73,52 @@ const REWARDS = [
   { name: "Shoe", image: "shoe.png", rarity: "uncommon" },
   { name: "Sausages", image: "sausges.png", rarity: "rare" },
   { name: "Coin", image: "coin.png", rarity: "rare" },
+  { name: "Crown", image: "crown.png", rarity: "epic" },         // <-- nieuw epic reward
   { name: "Cookie", image: "cookie.png", rarity: "legendary" },
 ];
 
-function getRandomReward() {
+function calculateMintChance(inserts: number): number {
+  // Basis: 0.01% kans → stijgt met elke insert
+  return Math.min(0.01 + inserts * 0.1, 5); // max 5% kans
+}
+
+async function getRandomReward(walletAddress: string, inserts: number) {
   const roll = Math.random() * 100;
+  const mintChance = calculateMintChance(inserts); // bijv. 0.01 + (inserts * 0.1)
+
   let pool;
+
   if (roll < 60) {
     pool = REWARDS.filter((r) => r.rarity === "common");
   } else if (roll < 90) {
     pool = REWARDS.filter((r) => r.rarity === "uncommon");
-  } else if (roll < 99.9) {
+  } else if (roll < 99.89) {
     pool = REWARDS.filter((r) => r.rarity === "rare");
-  } else {
+  } else if (roll < 99.99) {
+    pool = REWARDS.filter((r) => r.rarity === "epic");
+  } else if (Math.random() * 100 < mintChance) {
+    // 🔥 verhoogde kans op legendary
     pool = REWARDS.filter((r) => r.rarity === "legendary");
-    //await mintFoorfurNFT();
+
+    if (walletAddress?.length > 20) {
+      try {
+        const mint = await printEditionFromMaster(
+          process.env.MASTER_MINT_ADDRESS!,
+          walletAddress
+        );
+        console.log("🎁 Legendary edition minted to:", walletAddress, "Mint:", mint);
+      } catch (err) {
+        console.error("❌ Failed to mint legendary NFT:", err);
+      }
+    }
+  } else {
+    pool = REWARDS.filter((r) => r.rarity === "common"); // fallback
   }
+
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-const FOOF_MINT = "J5k8QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw"; // <-- Vervang door echte mint!
+const FOOF_MINT = "BVMxQqAgzBaUZQaEn1V74v5dKAUQykKSSEtMJJvWbonk"; // <-- Vervang door echte mint!
 
 const Home = () => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 600;
@@ -100,6 +129,7 @@ const Home = () => {
   const [timerKey, setTimerKey] = useState(0);
   const [burnedTokens, setBurnedTokens] = useState(0);
   const [showRewardModal, setShowRewardModal] = useState(false);
+  const [showLegendaryModal, setShowLegendaryModal] = useState(false);
   const [reward, setReward] = useState<null | {
     name: string;
     image: string;
@@ -108,10 +138,12 @@ const Home = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [inserted, setInserted] = useState(0);
   const { width, height } = useWindowSize();
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const [balance, setBalance] = useState<number | null>(null);
   const [isDummy, setIsDummy] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<{ wallet: string; burned: number }[]>([]);
 
   // Kies random tekst of op basis van state
   const [angelText, setAngelText] = useState(ANGEL_TEXTS[0]);
@@ -127,17 +159,6 @@ const Home = () => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    // Hier zou je de echte $FOOF balance ophalen, bijvoorbeeld via een API call
-    // Voor nu een dummy waarde na 1 seconde
-    if (connected && publicKey) {
-      setTimeout(() => {
-        setBalance(100); // Dummy balance
-      }, 1000);
-    } else {
-      setBalance(null);
-    }
-  }, [connected, publicKey]);
 
   useEffect(() => {
     if (!connected || !publicKey) {
@@ -145,7 +166,7 @@ const Home = () => {
       setIsDummy(false);
       return;
     }
-    const connection = new Connection("https://api.mainnet-beta.solana.com");
+    const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=a360743f-773d-430c-afcd-70370fd20b87");
     const getBalance = async () => {
       try {
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
@@ -157,6 +178,7 @@ const Home = () => {
         const amount =
           tokenAccounts.value[0]?.account.data.parsed.info.tokenAmount
             .uiAmount || 0;
+            console.debug("FOOF balance:", amount);
         if (amount === 0) {
           setBalance(10000);
           setIsDummy(true);
@@ -172,24 +194,69 @@ const Home = () => {
     getBalance();
   }, [connected, publicKey]);
 
-  const handleBurn = () => {
-    randomAngelText();
-    randomDuvelText();
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then((res) => res.json())
+      .then(setLeaderboard);
+  }, []);
+
+  const handleBurn = async () => {
+    try {
+      if (publicKey) {
+        const signature = await burnFoofToken({
+          connection,
+          walletPublicKey: publicKey.toBase58(),
+          mintAddress: FOOF_MINT,
+          amount: inserted * 1000000,
+          sendTransaction,
+        });
+
+        // Leaderboard updaten
+        setLeaderboard((prev) => {
+          const wallet = publicKey.toBase58();
+          const existing = prev.find((entry) => entry.wallet === wallet);
+          if (existing) {
+            return prev.map((entry) =>
+              entry.wallet === wallet
+                ? { ...entry, burned: entry.burned + inserted }
+                : entry
+            );
+          } else {
+            return [...prev, { wallet, burned: inserted }];
+          }
+        });
+
+        await fetch("/api/leaderboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: publicKey.toBase58(), burned: inserted }),
+        });
+        // Daarna opnieuw ophalen
+        fetch("/api/leaderboard")
+          .then((res) => res.json())
+          .then(setLeaderboard);
+
+        //alert(`Burned! Txid: ${signature}\nBekijk op Solscan:\nhttps://solscan.io/tx/${signature}`);
+      }
+    } catch (err) {
+      alert("Burn failed: " + (err as Error).message);
+      setPhase("idle");
+      return;
+    }
     setPhase("burning");
     setTimerKey((k) => k + 1);
 
-    // Dummy audio (optioneel) - niet blocking
     setTimeout(() => {
       const audio = new Audio("/microwave.mp3");
       audio.play().catch(() => {});
       setTimeout(() => {
         audio.pause();
         audio.currentTime = 0;
-      }, 11700); // stop na 12 seconden
+      }, 11700);
     }, 0);
   };
 
-  const handleMagnetronDone = () => {
+  const handleMagnetronDone = async () => {
     console.debug("Magnetron done: about to show reward modal");
 
     // Dummy audio (optioneel) - eerst afspelen
@@ -197,9 +264,15 @@ const Home = () => {
     audio.play().catch(() => {});
 
     // Daarna reward tonen
-    const selected = getRandomReward();
+    const walletAddress = publicKey ? publicKey.toBase58() : "dummy_wallet"
+    const selected = await getRandomReward(walletAddress, inserted);
     setReward(selected);
-    setShowRewardModal(true);
+    // Nieuw: toon juiste modal afhankelijk van rarity
+if (selected.rarity === "legendary") {
+  setShowLegendaryModal(true);
+} else {
+  setShowRewardModal(true);
+}
     setBurnedTokens((n) => n + 1);
 
     // Confetti tonen
@@ -211,6 +284,7 @@ const Home = () => {
     // Debug: check wanneer de modal gesloten wordt
     console.debug("Reward modal closed");
     setShowRewardModal(false);
+    setShowLegendaryModal(false);
     setTimeout(() => {
       setPhase("refund");
     }, 300);
@@ -219,7 +293,7 @@ const Home = () => {
   const handleInsert = () => {
     randomAngelText();
     randomDuvelText();
-    setInserted((n) => n + 1); // elke klik vermindert 1 token
+    setInserted((n) => (typeof n === "number" ? n + 1000 : 1000)); // elke klik vermindert 1000 token
 
     // Speel coin geluid af (optioneel)
     const audio = new Audio("/coin.mp3");
@@ -227,8 +301,8 @@ const Home = () => {
   };
 
   // Disable knoppen als geen wallet of geen $FOOF
-  const disableActions =
-    !connected || !publicKey || balance === null || balance <= 0;
+const disableInsert = !connected || !publicKey || balance === null || balance <= 0;
+const disableBurn = disableInsert || inserted <= 0;
 
   return (
     <div
@@ -419,17 +493,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* Refund timer direct onder header */}
-      {phase === "refund" && (
-        <div className="w-full flex flex-col items-center py-4">
-          <TokenRefundTimer
-            key={timerKey + 1000}
-            burnTime={REFUND_TIME}
-            onDone={() => setPhase("idle")}
-          />
-        </div>
-      )}
-
       {/* Burn Action */}
       <main className="flex flex-col items-center w-full pb-8">
         <div className="flex gap-1 md:gap-4 justify-center items-center relative z-20">
@@ -443,7 +506,7 @@ const Home = () => {
             }}
             onClick={handleBurn}
             aria-label="Burn"
-            disabled={phase !== "idle" || disableActions}
+            disabled={phase !== "idle" || disableBurn}
           >
             <Image
               src="/images/burn.png"
@@ -472,7 +535,7 @@ const Home = () => {
             }}
             onClick={handleInsert}
             aria-label="Insert"
-            disabled={phase !== "idle" || disableActions}
+            disabled={phase !== "idle" || disableInsert}
           >
             <Image
               src="/images/insert.png"
@@ -502,16 +565,17 @@ const Home = () => {
             ></span>
           </button>
         </div>
-        <Leaderboard burnedTokens={burnedTokens} />
+        <Leaderboard leaderboard={leaderboard} />
       </main>
 
       {/* Reward Modal */}
-      {showRewardModal && reward && (
-        <>
-          {console.debug("Rendering RewardModal with", reward)}
-          <RewardModal reward={reward} onClose={handleCloseRewardModal} />
-        </>
-      )}
+      {showRewardModal && reward && reward.rarity !== "legendary" && (
+  <RewardModal reward={reward} onClose={handleCloseRewardModal} />
+)}
+
+{showLegendaryModal && reward && reward.rarity === "legendary" && (
+  <LegendaryModal image={reward.image} name={reward.name} onClose={handleCloseRewardModal} />
+)}
 
       {/* Confetti */}
       {showConfetti && <Confetti width={width} height={height} />}
