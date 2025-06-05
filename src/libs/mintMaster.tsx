@@ -18,11 +18,11 @@ import fs from 'fs';
 import path from 'path';
 
 export const createMasterNft = async () => {
-  const rpc_url = process.env.RPC || 'https://mainnet.helius-rpc.com/?api-key=a360743f-773d-430c-afcd-70370fd20b87';
+  const rpc_url = process.env.RPC!;
 
   const umi = createUmi(rpc_url)
     .use(mplTokenMetadata())
-    .use(irysUploader({ address: 'https://node1.irys.xyz' }));
+    .use(irysUploader({ address: process.env.IRYS_NODE_RPC }));
 
   const secretKey = bs58.decode(process.env.TREASURY!);
   const mintKeypair = umi.eddsa.createKeypairFromSecretKey(secretKey);

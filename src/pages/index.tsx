@@ -118,7 +118,7 @@ async function getRandomReward(walletAddress: string, inserts: number) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-const FOOF_MINT = "BVMxQqAgzBaUZQaEn1V74v5dKAUQykKSSEtMJJvWbonk"; // <-- Vervang door echte mint!
+const FOOF_MINT = process.env.NEXT_PUBLIC_FOOF_CA!; // <-- Vervang door echte mint!
 
 const Home = () => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 600;
@@ -166,7 +166,7 @@ const Home = () => {
       setIsDummy(false);
       return;
     }
-    const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=a360743f-773d-430c-afcd-70370fd20b87");
+    const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL!);
     const getBalance = async () => {
       try {
         const tokenAccounts = await connection.getParsedTokenAccountsByOwner(

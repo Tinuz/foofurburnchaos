@@ -17,7 +17,7 @@ export const printEditionFromMaster = async (
   masterMint: string,
   recipientWallet: string
 ): Promise<string> => {
-  const rpc_url = process.env.RPC || 'https://mainnet.helius-rpc.com/?api-key=a360743f-773d-430c-afcd-70370fd20b87';
+  const rpc_url = process.env.RPC!;
 
   const umi = createUmi(rpc_url)
     .use(mplTokenMetadata())
