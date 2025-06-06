@@ -3,6 +3,9 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/admin": "pages/admin.js",
-  "/api/leaderboard": "pages/api/leaderboard.js",
-  "/": "pages/index.js"
+  "/api/barometer-goal": "pages/api/barometer-goal.js",
+  "/api/prizepool": "pages/api/prizepool.js",
+  "/": "pages/index.js",
+  "/api/barometer": "pages/api/barometer.js",
+  "/api/leaderboard": "pages/api/leaderboard.js"
 }

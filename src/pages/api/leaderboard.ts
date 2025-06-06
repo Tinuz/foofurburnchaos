@@ -32,7 +32,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === "POST") {
-    const { wallet, burned } = req.body;
+    const { wallet, burned, reset } = req.body;
+
+    // Reset leaderboard als reset:true wordt meegegeven
+    if (reset === true) {
+      await redis.set(key, []);
+      return res.status(200).json({ success: true, reset: true });
+    }
+
     if (!wallet || typeof burned !== "number") {
       return res.status(400).json({ error: "wallet and burned required" });
     }

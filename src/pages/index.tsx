@@ -15,6 +15,8 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import Ballon from "../components/Ballon";
 import { printEditionFromMaster } from '../libs/printEdition';
 import { burnFoofToken } from "../components/BurnToken";
+import PrizePool from "../components/PrizePool";
+import BurnBarometer from "../components/BaroMeter";
 
 
 const ANGEL_TEXTS = [
@@ -144,6 +146,9 @@ const Home = () => {
   const [mounted, setMounted] = useState(false);
   const [leaderboard, setLeaderboard] = useState<{ wallet: string; burned: number }[]>([]);
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+  const [barometer, setBarometer] = useState<number>(0);
+  const [barometerGoal, setBarometerGoal] = useState<number>(500000);
+  const [prizePool, setPrizePool] = useState<number | null>(null);
 
   // Kies random tekst of op basis van state
   const [angelText, setAngelText] = useState(ANGEL_TEXTS[0]);
@@ -204,12 +209,54 @@ const Home = () => {
         setLeaderboard(Array.isArray(data) ? data : []);
       } catch (err) {
         setLeaderboardError(
-          "Er is iets fout gegaan met het laden van het leaderboard. Probeer de pagina opnieuw te laden."
+          "Something went wrong loading the leaderboard. Please reload the page."
         );
         setLeaderboard([]);
       }
     };
     fetchLeaderboard();
+  }, []);
+
+  // Haal barometer op bij laden
+  useEffect(() => {
+    const fetchBarometer = async () => {
+      try {
+        const res = await fetch("/api/barometer");
+        const data = await res.json();
+        setBarometer(data.totalBurned || 0);
+      } catch {
+        setBarometer(0);
+      }
+    };
+    fetchBarometer();
+  }, []);
+
+  // Haal barometer goal op bij laden
+  useEffect(() => {
+    const fetchBarometerGoal = async () => {
+      try {
+        const res = await fetch("/api/barometer-goal");
+        const data = await res.json();
+        setBarometerGoal(typeof data.goal === "number" ? data.goal : 500000);
+      } catch {
+        setBarometerGoal(500000);
+      }
+    };
+    fetchBarometerGoal();
+  }, []);
+
+  // Haal prijzenpot op bij laden
+  useEffect(() => {
+    const fetchPrizePool = async () => {
+      try {
+        const res = await fetch("/api/prizepool");
+        const data = await res.json();
+        setPrizePool(typeof data.prizePool === "number" ? data.prizePool : null);
+      } catch {
+        setPrizePool(null);
+      }
+    };
+    fetchPrizePool();
   }, []);
 
   const handleBurn = async () => {
@@ -248,7 +295,17 @@ const Home = () => {
           .then((res) => res.json())
           .then(setLeaderboard);
 
-        //alert(`Burned! Txid: ${signature}\nBekijk op Solscan:\nhttps://solscan.io/tx/${signature}`);
+        // --- Barometer updaten ---
+        await fetch("/api/barometer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: inserted }),
+        });
+        // Nieuwe waarde ophalen
+        fetch("/api/barometer")
+          .then((res) => res.json())
+          .then((data) => setBarometer(data.totalBurned || 0));
+
       }
     } catch (err) {
       alert("Burn failed: " + (err as Error).message);
@@ -326,6 +383,11 @@ if (selected.rarity === "legendary") {
   // Disable knoppen als geen wallet of geen $FOOF
 const disableInsert = !connected || !publicKey || balance === null || balance <= 0;
 const disableBurn = disableInsert || inserted <= 0;
+
+  // Bonus berekenen voor PrizePool
+  const bonusSteps = Math.floor((barometer / barometerGoal) * 5); // 5 stappen tot 100%
+  const bonusPercent = Math.min(bonusSteps, 5);
+  const boostedPrize = prizePool ? +(prizePool * (1 + bonusPercent / 100)).toFixed(2) : 0;
 
   return (
     <div
@@ -588,11 +650,19 @@ const disableBurn = disableInsert || inserted <= 0;
             ></span>
           </button>
         </div>
+        
+        {/* BurnBarometer tussen de knoppen en het leaderboard */}
+        <BurnBarometer
+          totalBurned={barometer}
+          goal={barometerGoal}
+          basePrizePool={1.5}
+        />
+
         {leaderboardError && (
-  <div className="bg-red-100 text-red-800 p-4 rounded mb-4 text-center font-bold">
-    {leaderboardError}
-  </div>
-)}
+          <div className="bg-red-100 text-red-800 p-4 rounded mb-4 text-center font-bold">
+            {leaderboardError}
+          </div>
+        )}
         <Leaderboard leaderboard={leaderboard} />
       </main>
 
@@ -612,18 +682,18 @@ const disableBurn = disableInsert || inserted <= 0;
 
       {/* Footer */}
       <footer
-        className="w-full py-5 px-4 mt-auto flex flex-col md:flex-row items-center justify-between text-xs"
+        className="w-full py-5 px-4 mt-auto flex flex-col items-center justify-center text-xs"
         style={{
           color: "#3a2f1b",
           opacity: 0.85,
           fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
-        <div>
+        <div className="text-center mb-2">
           <span className="font-bold">Disclaimer:</span> Not financial advice.
           Probably not even a game.
         </div>
-        <div className="flex gap-3 mt-2 md:mt-0">
+        <div className="flex gap-3">
           <Link
             href="https://foofurskatje-3uuf.vercel.app/"
             className="underline hover:text-[#cc3d3d]"
@@ -710,6 +780,7 @@ const disableBurn = disableInsert || inserted <= 0;
           }
         }
       `}</style>
+      <PrizePool solPrize={boostedPrize} boostPercent={bonusPercent} />
     </div>
   );
 };
