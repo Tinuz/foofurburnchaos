@@ -2,10 +2,10 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/admin": "pages/admin.js",
-  "/api/barometer-goal": "pages/api/barometer-goal.js",
-  "/api/prizepool": "pages/api/prizepool.js",
   "/": "pages/index.js",
+  "/admin": "pages/admin.js",
   "/api/barometer": "pages/api/barometer.js",
+  "/api/prizepool": "pages/api/prizepool.js",
+  "/api/barometer-goal": "pages/api/barometer-goal.js",
   "/api/leaderboard": "pages/api/leaderboard.js"
 }

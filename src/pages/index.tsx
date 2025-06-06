@@ -383,6 +383,7 @@ if (selected.rarity === "legendary") {
   // Disable knoppen als geen wallet of geen $FOOF
 const disableInsert = !connected || !publicKey || balance === null || balance <= 0;
 const disableBurn = disableInsert || inserted <= 0;
+const disableAll = true; // Zet deze op true om alles uit te schakelen
 
   // Bonus berekenen voor PrizePool
   const bonusSteps = Math.floor((barometer / barometerGoal) * 5); // 5 stappen tot 100%
@@ -397,9 +398,9 @@ const disableBurn = disableInsert || inserted <= 0;
           "radial-gradient(ellipse at 50% 30%, #d2b77c 60%, #8c6b3f 100%)",
       }}
     >
-      {/* WalletConnect button rechtsboven */}
-      <div className="absolute right-4 top-4 z-20">
-        <WalletConnect />
+      {/* Melding bovenaan */}
+      <div className="w-full bg-yellow-200 text-yellow-900 text-center py-3 font-bold text-lg shadow mb-4">
+        The first contest starts on July 1st. All actions are currently disabled.
       </div>
 
       <Header />
@@ -591,7 +592,7 @@ const disableBurn = disableInsert || inserted <= 0;
             }}
             onClick={handleBurn}
             aria-label="Burn"
-            disabled={phase !== "idle" || disableBurn}
+            disabled={disableAll || phase !== "idle" || disableBurn}
           >
             <Image
               src="/images/burn.png"
@@ -620,7 +621,7 @@ const disableBurn = disableInsert || inserted <= 0;
             }}
             onClick={handleInsert}
             aria-label="Insert"
-            disabled={phase !== "idle" || disableInsert}
+            disabled={disableAll || phase !== "idle" || disableInsert}
           >
             <Image
               src="/images/insert.png"
